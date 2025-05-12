@@ -1,7 +1,6 @@
-FROM golang:1.24.3-bookworm
+FROM golang:1.24.3-bookworm AS build
 
-RUN useradd -m -d /home/app app
-WORKDIR /home/app/src
+WORKDIR /go/src/app
 
 COPY go.mod go.sum ./
 RUN go mod download
@@ -10,9 +9,10 @@ COPY cmd/ cmd/
 COPY lib/ lib/
 COPY templates/ templates/
 COPY main.go main.go
-RUN go build -o build/fizzbuzz
+RUN CGO_ENABLED=0 go build -o /go/bin/app
 
+FROM scratch
 EXPOSE 8080
-USER app
-
-CMD ["./build/fizzbuzz", "serve"]
+COPY --from=build /go/bin/app /
+COPY templates /templates
+CMD ["./app", "serve"]
