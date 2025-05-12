@@ -11,8 +11,8 @@ COPY templates/ templates/
 COPY main.go main.go
 RUN CGO_ENABLED=0 go build -o /go/bin/app
 
-FROM scratch
+FROM gcr.io/distroless/static-debian12
 EXPOSE 8080
 COPY --from=build /go/bin/app /
 COPY templates /templates
-CMD ["./app", "serve"]
+ENTRYPOINT ["./app", "serve"]
